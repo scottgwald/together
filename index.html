@@ -29,14 +29,14 @@
 
 	ws.subscribe('image:android:glass', function(chan, msg, msg1, msg2) {
 		console.log(chan);
-		if (!gotFirstImage) {
-			console.log("Setting image source");
-			console.log(msg);
-			console.log(msg1);
-			console.log(msg2);
-			gotFirstImage = true;
-			$('#theImage').attr('src', 'data:image/jpg;base64,' + btoa(msg1));
-		}
+		$('#theImage').attr('src', 'data:image/jpg;base64,' + btoa(msg1));
+		// if (!gotFirstImage) {
+		// 	console.log("Setting image source");
+		// 	console.log(msg);
+		// 	console.log(msg1);
+		// 	console.log(msg2);
+		// 	gotFirstImage = true;
+		// }
 	});
 
 	function myWearScriptConnectionFactory(websocket, glassConnectedCallback) {
