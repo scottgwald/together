@@ -23,35 +23,125 @@
     <script type="text/javascript" src="js/wearscript-client.js"></script>
     <script type="text/javascript" src="js/reconnecting-websocket.js"></script>
     <script type="text/javascript" src="jquery/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="js/underscore.js"></script>
 
     <script type="text/javascript">
-      server = "wss://api.wearscript.com/ws/nQkzM25xDzPFbnn4";
-      // server = "wss://api.picar.us/wearscriptdev/ws";
-      //server = 'ws://api.picar.us/wearscriptdev/ws';
-      Socket = new ReconnectingWebSocket(server);
-      console.log("Made the socket.");
-      ws = myWearScriptConnectionFactory(Socket, function (connected) {
-        //$.ready(function() {
-          // $('#theDiv').html("WearScript Connected.");
-          // $('#theImage').attr('src', 'cute-little-cat.jpg');
-          // $('#theImage').attr('width', 1000);
-          console.log('Connected: ' + connected);
-        //});
-        });
+        var IDlist = [ "f8:8f:ca:25:58:6b", "f8:8f:ca:25:58:8b", "f8:8f:ca:25:c5:0b", "f8:8f:ca:24:64:89", "f8:8f:ca:24:65:25", "f8:8f:ca:25:f8:e5"];
 
-      // e.g. publish statement from broadcaster: 
-      // ws.publish(“glassprov”, {user: "kevin.b.tu", command: “showline”, line: “What’s my line”});
-      // ws.publish(“glassprov”, {user: "scottgwald", command: "playvideo", line: “001.mp4”});
-      ws.subscribe('glassprov', glassprov_cb);
-      function glassprov_cb(channel, message) {
-        // update user name
-        console.log("WOW THIS WORKS!");
-        if(message.command=="showline"){
-          // show line
-        } else if(message.command=="playvideo"){
-          // play video
-        }
+
+        var lineChannels = _.map(IDlist, function(el) {return "lines:" + el});
+        lineChannels.unshift("lines");
+
+        var vidChannels = _.map(IDlist, function(el){ return "videos:" + el});
+        vidChannels.unshift("videos");
+
+        wssuccess = function(data){
+          server = data.wsurl;
+          Socket = new ReconnectingWebSocket(server);
+          console.log("Made the socket.");
+          ws = myWearScriptConnectionFactory(Socket, function (connected) {
+              console.log('Connected: ' + connected);
+          });
+
+          // e.g. publish statement from broadcaster: 
+          // ws.publish("glassprov", {user: "kevin.b.tu", glass:"1", command: "showline", line: "What's my line"});
+          // ws.publish("glassprov", {user: "scottgwald", glass:"2", command: "playvideo", line: "vid001.mp4"});
+
+          // User: username
+          // glass: 1-4 (Which quadrant to display in)
+          // command: "showline" or "playvideo"
+          // line: text to display or video identifier
+
+          //ws.subscribe('glassprov', glassprov_cb);
+          // ws.subscribe('lines', lines_cb);
+          for (chan in lineChannels) {
+            ws.subscribe(lineChannels[chan], lines_cb)
+          }
+          for (chan in vidChannels) {
+            ws.subscribe(vidChannels[chan], vid_cb);
+          }
+          ws.subscribe("slides:", slides_cb);
+      };
+      $.ajax({
+          type: "GET",
+          url: "/api/ws/get",
+          dataType: 'json',
+          success: wssuccess
+      });
+
+      var nPanels = 6;
+
+      function lines_cb(channel, message) {
+          var panel = lineChannels.indexOf(channel);
+          if (panel == 0) {
+            for (var i = 0; i < nPanels; i++ ) {
+              $("#q" + (panel + 1) + " span").html(message.text);
+            }
+            //send to all
+          } else {
+            $("#q" + panel + " span").html(message.text);
+            // send to the specific one
+          }
+          // show line on panel
       }
+
+      function slides_cb(channel, message) {
+          console.log("slides");
+          for (var i = 0; i < nPanels; i++ ) {
+              $("#q" + (i + 1) + " span").html("<img style='max-height:100%;max-width:100%;' src='"+message.url+"'/>");
+            }
+      }
+      // var id = 'video'+quadrant;
+      //     var finalText = "<video loop autoplay preload id='"+id+"'"+" class='video-js vjs-default-skin'"+" preload='auto' width='500' height='280'"+"><source src="+"'"+"videos/"+message.line+"'"+" type='video/mp4' />"+"</video>";
+      //     document.getElementsByClassName("text")[quadrant].innerHTML=finalText;
+
+      function vid_cb(channel, message) {
+          var panel = vidChannels.indexOf(channel);
+          $("video").remove();
+          if (panel == 0) {
+            for (var i = 0; i < nPanels; i++ ) {
+              $("#q" + (panel + 1) + " span").html("<video autoplay preload class='video-js vjs-default-skin' preload='auto'  style='max-height:100%;max-width:100%;'><source src='"+ escape(message.url)+"' type='video/mp4'/> </video>");
+            }
+            //send to all
+          } else {
+            $("#q" + panel + " span").html("<video autoplay preload class='video-js vjs-default-skin' preload='auto' style='max-height:100%;max-width:100%;'><source src='"+ escape(message.url)+"' type='video/mp4'/> </video>");
+            // send to the specific one
+          }
+          // show line on panel
+      }
+
+            // WS.subscribe('lines:' + me, function(chan, data) {
+            //     console.log("Got a lines object!");
+            //     console.log(JSON.stringify(data));
+            //     if (data.glassID == me) {
+            //         WS.wake();
+            //         WS.activityCreate();
+            //         WS.displayCardTree();
+            //         var tree = new WS.Cards();
+            //         tree.add(data.text, 'GlassProv');
+            //         WS.cardTree(tree);
+            //         //console.log("It's me! And the text is: " + data.text);
+            //         //WS.say(data.text);
+            //     } else {
+            //         console.log("It's not me. But the text is: " + data.text);
+            //     }
+            // });
+
+
+      // function glassprov_cb(channel, message) {
+      //   // update user name
+      //   var quadrant = message.glass-1;
+      //   document.getElementsByClassName("user")[quadrant].innerHTML=message.user;
+      //   document.getElementsByClassName("audience-name")[quadrand].innerHTML="Submitted By: "+message.audience;
+      //   if(message.command=="showline"){
+      //     document.getElementsByClassName("text")[quadrant].innerHTML=message.line;
+      //     $('text').textfill({ maxFontPixels: 75 });
+      //   } else if(message.command=="playvideo"){
+      //     var id = 'video'+quadrant;
+      //     var finalText = "<video loop autoplay preload id='"+id+"'"+" class='video-js vjs-default-skin'"+" preload='auto' width='500' height='280'"+"><source src="+"'"+"videos/"+message.line+"'"+" type='video/mp4' />"+"</video>";
+      //     document.getElementsByClassName("text")[quadrant].innerHTML=finalText;
+      //   }
+      // }
 
       function myWearScriptConnectionFactory(websocket, glassConnectedCallback) {
           function onopen(event) {
@@ -111,10 +201,39 @@
       $('.q2').textfill({ maxFontPixels: 75 });
       $('.q3').textfill({ maxFontPixels: 75 });
       $('.q4').textfill({ maxFontPixels: 75 });
+      $('.q5').textfill({ maxFontPixels: 75 });
+      $('.q6').textfill({ maxFontPixels: 75 });
     });
+    
     </script>
 
+    <script>
+    // switching between single screen and multi screens
     
+    function clearContent(){
+        var num = 6;
+        while(num>=0){
+            document.getElementsByClassName('user')[num].innerHTML = "";
+            document.getElementsByClassName('text')[num].innerHTML = "";
+            num-=1;
+            console.log(num);
+        }
+    }
+
+    var display = "6";
+    function toggle4(){
+        clearContent();
+        location.href = "#q1";
+        display = "6";
+    }
+    
+    //WEARSCRIPT INTEGRATION
+
+    function handleInput(){
+
+    }
+
+    </script>
 
 
   </head>
@@ -127,52 +246,74 @@
  <source src="videos/001.mp4" type='video/mp4' />
  </video> -->
 
-  <div id="q1" class="container q1" style="width:50%; height:50%; float:left">
-    <div class="user">
-      kevin.b.tu
-    </div>
+  <div id="q1" class="container q1" style="width:33%; height:50%; float:left">
+    <div class="user"></div>
+    <div class="audience-name"></div>
     <div class="text-container">
       <div class="text">
-        <span> Sample Text</span>
+        <span></span>
       </div>
     </div>
   </div>
 
-  <div id="q2" class="container q2" style="width:50%; height:50%; float:right">
-    <div class="user">
-      swgreen
-    </div>
+  <div id="q2" class="container q2" style="width:33%; height:50%; float:left">
+    <div class="user"></div>
+    <div class="audience-name"></div>
     <div class="text-container">
       <div class="text">
-        <span>Sample Text</span>
+        <span></span>
       </div>
     </div>
   </div>
 
-  <div id="q3" class="container q3" style="width:50%; height:50%; float:left">
-    <div class="user">
-      shrig94
-    </div>
+  <div id="q3" class="container q3" style="width:34%; height:50%; float:right">
+    <div class="user"></div>
+    <div class="audience-name"></div>
     <div class="text-container">
       <div class="text">
-        <span>Sample Text</span>
+        <span></span>
       </div>
     </div>
   </div>
 
-  <div id="q4" class="container q4" style="width:50%; height:50%; float:right">
-    <div class="user">
-      daniel.l.mendelsohn
-    </div>
+  <div id="q4" class="container q4" style="width:33%; height:50%; float:left">
+    <div class="user"></div>
+    <div class="audience-name"></div>
     <div class="text-container">
       <div class="text">
-        <span>Sample Text</span>
+        <span></span>
       </div>
     </div>
   </div>
 
-  <button id="testButton1" style="color:black;"onclick="insertVideo('1','kevinsux@gmail.com','001.mp4');insertText('2','Shri','OMG THIS SAMPLE TEXT WORKS! LOOK AT THIS!');insertText('3','scottgwald','I am unimpressed...');insertVideo('4','Daniel','002.mp4');">Test!</button>
-  <button id="testButton2" style="color:black;"onclick="insertText('2','Shri','lolololllllllllll! ');insertText('3','scottgwald','poop');">Test!</button>
-  <button id="testButton3" style="color:black;"onclick="insertVideo('2','kevinsux@gmail.com','001.mp4');insertText('3','scottgwald','yahooo');">Test!</button>
+  <div id="q5" class="container q5" style="width:33%; height:50%; float:left">
+    <div class="user"></div>
+    <div class="audience-name"></div>
+    <div class="text-container">
+      <div class="text">
+        <span></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="q6" class="container q6" style="width:34%; height:50%; float:right">
+    <div class="user"></div>
+    <div class="audience-name"></div>
+    <div class="text-container">
+      <div class="text">
+        <span></span>
+      </div>
+    </div>
+  </div>
+<!--   <div id="q5" style="width:100%;height:100%;position:relative;z-index:100;float:right;" class="container q5">
+    <div class="user">Test</div>
+    <div class="audience-name">Test</div>
+    <div class="text-container">
+      <div class="text">
+	<span>Test</span>
+      </div>
+    </div>
+
+  </div> -->
   </body>
 </html>
