@@ -22,7 +22,7 @@
     <script type="text/javascript" src="js/msgpack.js"></script>
     <script type="text/javascript" src="js/wearscript-client.js"></script>
     <script type="text/javascript" src="js/reconnecting-websocket.js"></script>
-    <script type="text/javascript" src="jquery/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="js/underscore.js"></script>
 
     <script type="text/javascript">
@@ -34,6 +34,11 @@
 
         var vidChannels = _.map(IDlist, function(el){ return "videos:" + el});
         vidChannels.unshift("videos");
+
+        ws.subscribe('image:android:glass', function(chan, msg, msg1, msg2) {
+          console.log(chan);
+          $('#theImage').attr('src', 'data:image/jpg;base64,' + btoa(msg1));
+        });
 
         wssuccess = function(data){
           server = data.wsurl;
@@ -315,5 +320,10 @@
     </div>
 
   </div> -->
+  <script>
+  $.ready(function() {
+    $('#q1').css("background-image",  "url(cute-little-cat.jpg)");
+  })
+  </script>
   </body>
 </html>
