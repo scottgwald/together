@@ -40,6 +40,11 @@
         //   $('#theImage').attr('src', 'data:image/jpg;base64,' + btoa(msg1));
         // });
 
+        $.ready(function() {
+          console.log("ready function");
+          $('#q1').css("background-image",  "url(cute-little-cat.jpg)");
+        });
+
         wssuccess = function(data){
           server = data.wsurl;
           Socket = new ReconnectingWebSocket(server);
@@ -321,10 +326,7 @@
 
   </div> -->
   <script>
-  $.ready(function() {
-    console.log("ready function");
-    $('#q1').css("background-image",  "url(cute-little-cat.jpg)");
-  });
+
   </script>
   </body>
 </html>
