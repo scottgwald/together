@@ -1,0 +1,178 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="../../assets/ico/favicon.ico">
+
+    <title>GlassProv</title>
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/viewercss.css" rel="stylesheet">
+    <script type="text/javascript" src="js/viewer.js"></script>
+    <link href="videos/video-js/video-js.css" rel="stylesheet">
+
+    <script src="videos/video-js/video.js"></script>
+    <script type="text/javascript" src="js/msgpack.js"></script>
+    <script type="text/javascript" src="js/wearscript-client.js"></script>
+    <script type="text/javascript" src="js/reconnecting-websocket.js"></script>
+    <script type="text/javascript" src="jquery/jquery-1.11.0.min.js"></script>
+
+    <script type="text/javascript">
+      server = "wss://api.wearscript.com/ws/nQkzM25xDzPFbnn4";
+      // server = "wss://api.picar.us/wearscriptdev/ws";
+      //server = 'ws://api.picar.us/wearscriptdev/ws';
+      Socket = new ReconnectingWebSocket(server);
+      console.log("Made the socket.");
+      ws = myWearScriptConnectionFactory(Socket, function (connected) {
+        //$.ready(function() {
+          // $('#theDiv').html("WearScript Connected.");
+          // $('#theImage').attr('src', 'cute-little-cat.jpg');
+          // $('#theImage').attr('width', 1000);
+          console.log('Connected: ' + connected);
+        //});
+        });
+
+      // e.g. publish statement from broadcaster: 
+      // ws.publish(“glassprov”, {user: "kevin.b.tu", command: “showline”, line: “What’s my line”});
+      // ws.publish(“glassprov”, {user: "scottgwald", command: "playvideo", line: “001.mp4”});
+      ws.subscribe('glassprov', glassprov_cb);
+      function glassprov_cb(channel, message) {
+        // update user name
+        console.log("WOW THIS WORKS!");
+        if(message.command=="showline"){
+          // show line
+        } else if(message.command=="playvideo"){
+          // play video
+        }
+      }
+
+      function myWearScriptConnectionFactory(websocket, glassConnectedCallback) {
+          function onopen(event) {
+              console.log('opened');
+        ws.subscribe('subscriptions', subscription_cb);
+              ws.subscribe('log', log_cb);
+              ws.subscribe('urlopen', urlopen_cb);
+        subscription_cb();
+          }
+          var ws = new WearScriptConnection(websocket, "webapp", Math.floor(Math.random() * 100000), onopen);
+          ws.subscribeTestHandler();
+          function subscription_cb() {
+        glassConnectedCallback(ws.exists('glass'));
+              // TODO(brandyn): Only do this once, then provide a button to refresh
+          }
+          function log_cb(channel, message) {
+              console.log(channel + ': ' + message);
+              // TODO(brandyn): Have a notification that a log message was sent
+          }
+          function gist_modify_cb(channel, gists) {
+              HACK_GIST_MODIFIED = gists;
+              console.log('Gist modified');
+          }
+          function gist_get_cb(channel, gist) {
+              window.HACK_GIST = gist;
+              console.log(channel + ': ' + gist);
+          }
+          function urlopen_cb(channel, url) {
+              window.open(url);
+          }
+          return ws;
+      }
+    </script>
+
+
+    <script>
+    // Code to auto resize text to fit in box.
+    ;(function($) {
+      $.fn.textfill = function(options) {
+          var fontSize = options.maxFontPixels;
+          var ourText = $('span:visible:first', this);
+          var maxHeight = $(this).height();
+          var maxWidth = $(this).width();
+          var textHeight;
+          var textWidth;
+          do {
+              ourText.css('font-size', fontSize);
+              textHeight = ourText.height();
+              textWidth = ourText.width();
+              fontSize = fontSize - 1;
+          } while ((textHeight > maxHeight || textWidth > maxWidth) && fontSize > 3);
+          return this;
+      }
+    })(jQuery);
+    $(document).ready(function() {
+      $('.q1').textfill({ maxFontPixels: 75 });
+      $('.q2').textfill({ maxFontPixels: 75 });
+      $('.q3').textfill({ maxFontPixels: 75 });
+      $('.q4').textfill({ maxFontPixels: 75 });
+    });
+    </script>
+
+    
+
+
+  </head>
+
+  <body>
+
+<!-- <video id="example_video_1" class="video-js vjs-default-skin"
+  controls preload="auto" width="640" height="264"
+  data-setup='{"autoplay": true, "example_option":true}'>
+ <source src="videos/001.mp4" type='video/mp4' />
+ </video> -->
+
+  <div id="q1" class="container q1" style="width:50%; height:50%; float:left">
+    <div class="user">
+      kevin.b.tu
+    </div>
+    <div class="text-container">
+      <div class="text">
+        <span> Sample Text</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="q2" class="container q2" style="width:50%; height:50%; float:right">
+    <div class="user">
+      swgreen
+    </div>
+    <div class="text-container">
+      <div class="text">
+        <span>Sample Text</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="q3" class="container q3" style="width:50%; height:50%; float:left">
+    <div class="user">
+      shrig94
+    </div>
+    <div class="text-container">
+      <div class="text">
+        <span>Sample Text</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="q4" class="container q4" style="width:50%; height:50%; float:right">
+    <div class="user">
+      daniel.l.mendelsohn
+    </div>
+    <div class="text-container">
+      <div class="text">
+        <span>Sample Text</span>
+      </div>
+    </div>
+  </div>
+
+  <button id="testButton1" style="color:black;"onclick="insertVideo('1','kevinsux@gmail.com','001.mp4');insertText('2','Shri','OMG THIS SAMPLE TEXT WORKS! LOOK AT THIS!');insertText('3','scottgwald','I am unimpressed...');insertVideo('4','Daniel','002.mp4');">Test!</button>
+  <button id="testButton2" style="color:black;"onclick="insertText('2','Shri','lolololllllllllll! ');insertText('3','scottgwald','poop');">Test!</button>
+  <button id="testButton3" style="color:black;"onclick="insertVideo('2','kevinsux@gmail.com','001.mp4');insertText('3','scottgwald','yahooo');">Test!</button>
+  </body>
+</html>
