@@ -68,7 +68,7 @@
 
         ws.subscribe('image:android:glass', function(chan, msg, msg1, msg2) {
           console.log(chan);
-          $('#q1').attr('src', 'data:image/jpg;base64,' + btoa(msg1));
+          $('#q1').css('background-image', 'data:image/jpg;base64,' + btoa(msg1));
           // if (!gotFirstImage) {
           //  console.log("Setting image source");
           //  console.log(msg);
