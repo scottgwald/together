@@ -44,6 +44,7 @@
           console.log("ready function");
           $('#q1').css("background-image",  "url(cute-little-cat.jpg)");
           $('#q1').css("background-size", "100%");
+          $('#q2').css("background-size", "100%");
         });
 
         // works if you're already authenticated in this browser
@@ -74,7 +75,7 @@
           if (chan == "image:android:glass:f88fca26273d") {
             $('#q2').css('background-image', 'url(data:image/jpg;base64,' + btoa(msg1) + ')');
           }
-          
+
           // if (!gotFirstImage) {
           //  console.log("Setting image source");
           //  console.log(msg);
