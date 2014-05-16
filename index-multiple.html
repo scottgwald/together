@@ -35,10 +35,10 @@
         var vidChannels = _.map(IDlist, function(el){ return "videos:" + el});
         vidChannels.unshift("videos");
 
-        ws.subscribe('image:android:glass', function(chan, msg, msg1, msg2) {
-          console.log(chan);
-          $('#theImage').attr('src', 'data:image/jpg;base64,' + btoa(msg1));
-        });
+        // ws.subscribe('image:android:glass', function(chan, msg, msg1, msg2) {
+        //   console.log(chan);
+        //   $('#theImage').attr('src', 'data:image/jpg;base64,' + btoa(msg1));
+        // });
 
         wssuccess = function(data){
           server = data.wsurl;
