@@ -11,7 +11,7 @@
 
 <script type="text/javascript">
 	// works if you're already authenticated in this browser
-
+	var firstLoad = true;
 	//server = "wss://api.wearscript.com/ws";
 	server = "wss://api.wearscript.com/ws/nQkzM25xDzPFbnn4";
 	//server = "ws://glassprov.media.mit.edu:8080/ws/";
@@ -20,10 +20,13 @@
 	console.log("Made the socket.");
 	ws = myWearScriptConnectionFactory(Socket, function (connected) {
 		//$.ready(function() {
+	        console.log('Connected: ' + connected);
+	        if (firstLoad) {
 			$('#theDiv').html("WearScript Connected.");
 			$('#theImage').attr('src', 'cute-little-cat.jpg');
 			$('#theImage').attr('width', 1000);
-			console.log('Connected: ' + connected);
+			firstLoad = false;
+	        }
 		//});
   	});
 
