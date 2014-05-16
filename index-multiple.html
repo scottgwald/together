@@ -68,7 +68,13 @@
 
         ws.subscribe('image:android:glass', function(chan, msg, msg1, msg2) {
           console.log(chan);
-          $('#q1').css('background-image', 'url(data:image/jpg;base64,' + btoa(msg1) + ')');
+          if (chan == "image:android:glass:f88fca25588b") {
+            $('#q1').css('background-image', 'url(data:image/jpg;base64,' + btoa(msg1) + ')');
+          } 
+          if (chan == "image:android:glass:f88fca26273d") {
+            $('#q2').css('background-image', 'url(data:image/jpg;base64,' + btoa(msg1) + ')');
+          }
+          
           // if (!gotFirstImage) {
           //  console.log("Setting image source");
           //  console.log(msg);
