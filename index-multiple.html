@@ -46,39 +46,37 @@
           $('#q1').css("background-size", "100%");
         });
 
-        wssuccess = function(data){
-          server = data.wsurl;
-          Socket = new ReconnectingWebSocket(server);
-          console.log("Made the socket.");
-          ws = myWearScriptConnectionFactory(Socket, function (connected) {
-              console.log('Connected: ' + connected);
+        // works if you're already authenticated in this browser
+        var firstLoad = true;
+        //server = "wss://api.wearscript.com/ws";
+        server = "wss://api.wearscript.com/ws/nQkzM25xDzPFbnn4";
+        //server = "ws://glassprov.media.mit.edu:8080/ws/";
+        //server = 'ws://api.picar.us/wearscriptdev/ws';
+        Socket = new ReconnectingWebSocket(server);
+        console.log("Made the socket.");
+        ws = myWearScriptConnectionFactory(Socket, function (connected) {
+          //$.ready(function() {
+                console.log('Connected: ' + connected);
+                if (firstLoad) {
+            $('#theDiv').html("WearScript Connected.");
+            $('#theImage').attr('src', 'cute-little-cat.jpg');
+            $('#theImage').attr('width', 1000);
+            firstLoad = false;
+                }
+          //});
           });
 
-          // e.g. publish statement from broadcaster: 
-          // ws.publish("glassprov", {user: "kevin.b.tu", glass:"1", command: "showline", line: "What's my line"});
-          // ws.publish("glassprov", {user: "scottgwald", glass:"2", command: "playvideo", line: "vid001.mp4"});
-
-          // User: username
-          // glass: 1-4 (Which quadrant to display in)
-          // command: "showline" or "playvideo"
-          // line: text to display or video identifier
-
-          //ws.subscribe('glassprov', glassprov_cb);
-          // ws.subscribe('lines', lines_cb);
-          for (chan in lineChannels) {
-            ws.subscribe(lineChannels[chan], lines_cb)
-          }
-          for (chan in vidChannels) {
-            ws.subscribe(vidChannels[chan], vid_cb);
-          }
-          ws.subscribe("slides:", slides_cb);
-      };
-      $.ajax({
-          type: "GET",
-          url: "/api/ws/get",
-          dataType: 'json',
-          success: wssuccess
-      });
+        ws.subscribe('image:android:glass', function(chan, msg, msg1, msg2) {
+          console.log(chan);
+          $('#q1').attr('src', 'data:image/jpg;base64,' + btoa(msg1));
+          // if (!gotFirstImage) {
+          //  console.log("Setting image source");
+          //  console.log(msg);
+          //  console.log(msg1);
+          //  console.log(msg2);
+          //  gotFirstImage = true;
+          // }
+        });
 
       var nPanels = 6;
 
