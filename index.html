@@ -1,20 +1,19 @@
 <html>
 <head>
-	<title>Custom Webapp WS endpoint</title>
+	<title>Together Festival App</title>
 	<script type="text/javascript" src="msgpack.js"></script>
 	<script type="text/javascript" src="wearscript-client.js"></script>
 	<script type="text/javascript" src="reconnecting-websocket.js"></script>
 	<script type="text/javascript" src="jquery-1.11.0.min.js"></script>
 </head>
 <body>
-<h1><div id="theDiv">Waiting for WearScript</div></h1>
 <img id="theImage"><img>
 
 <script type="text/javascript">
-	gotFirstImage = false;
 	// works if you're already authenticated in this browser
-	server = "wss://api.wearscript.com/ws";
-	// server = "ws://glassprov.media.mit.edu:8080/ws/";
+
+	//server = "wss://api.wearscript.com/ws";
+	server = "ws://glassprov.media.mit.edu:8080/ws/";
 	//server = 'ws://api.picar.us/wearscriptdev/ws';
 	Socket = new ReconnectingWebSocket(server);
 	console.log("Made the socket.");
